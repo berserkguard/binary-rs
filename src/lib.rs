@@ -36,6 +36,26 @@ impl From<StreamError> for BinaryError {
     }
 }
 
+impl std::fmt::Display for BinaryError {
+    fn fmt(&self, f: &mut std::fmt::Formatter) -> std::fmt::Result {
+        match *self {
+            BinaryError::StreamError(..) => write!(f, "Encountered a stream error"),
+            BinaryError::BinCodeErr(..)  => write!(f, "Encountered a bincode error with serialization/deserialization"),
+            BinaryError::Utf8Error(..)   => write!(f, "Encountered a UTF-8 decoding error"),
+        }
+    }
+}
+
+impl std::error::Error for BinaryError {
+    fn source(&self) -> Option<&(dyn std::error::Error + 'static)> {
+        match *self {
+            BinaryError::StreamError(ref e) => Some(e),
+            BinaryError::BinCodeErr(ref e) => Some(e),
+            BinaryError::Utf8Error(ref e) => Some(e),
+        }
+    }
+}
+
 #[derive(Debug)]
 pub enum StreamError {
     OpenError,
@@ -43,6 +63,24 @@ pub enum StreamError {
     ReadError,
     SeekError,
     TellError,
+}
+
+impl std::fmt::Display for StreamError {
+    fn fmt(&self, f: &mut std::fmt::Formatter) -> std::fmt::Result {
+        match *self {
+            StreamError::OpenError  => write!(f, "Encountered a stream error trying to open"),
+            StreamError::WriteError => write!(f, "Encountered a stream error trying to write"),
+            StreamError::ReadError  => write!(f, "Encountered a stream error trying to read"),
+            StreamError::SeekError  => write!(f, "Encountered a stream error trying to seek"),
+            StreamError::TellError  => write!(f, "Encountered a stream error trying to tell"),
+        }
+    }
+}
+
+impl std::error::Error for StreamError {
+    fn source(&self) -> Option<&(dyn std::error::Error + 'static)> {
+        None
+    }
 }
 
 pub trait Stream {
